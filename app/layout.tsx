@@ -1,22 +1,25 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
+import { Fredoka } from "next/font/google";
+import "./globals.css";
 
-const inter = Inter({ subsets: ['latin'] })
+const fredoka = Fredoka({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  display: "swap",
+});
 
-export const metadata: Metadata = {
-  title: 'Math Problem Generator',
-  description: 'AI-powered math problem generator for Primary 5 students',
-}
+export const metadata = {
+  title: "Math Problem Generator",
+  description: "Fun AI-powered math problems for kids!",
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={fredoka.className}>{children}</body>
     </html>
-  )
+  );
 }

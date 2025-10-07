@@ -1,93 +1,232 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-
-interface MathProblem {
-  problem_text: string
-  final_answer: number
-}
+import { useState } from "react";
+import { Toaster } from "react-hot-toast";
+import { FaTrophy } from "react-icons/fa";
+import { GrHistory } from "react-icons/gr";
+import { IconButton } from "./components/IconButton";
+import ScoreTracker from "./components/ScoreTracker";
+import { AnswerForm } from "./components/views/AnswerForm";
+import { ErrorView } from "./components/views/ErrorView";
+import { FeedbackView } from "./components/views/FeedbackView";
+import { HintView } from "./components/views/HintView";
+import { HistoryView } from "./components/views/HistoryView";
+import { LandingView } from "./components/views/LandingView";
+import { ProblemDisplay } from "./components/views/ProblemDisplay";
+import { useHints } from "./hooks/useHints";
+import { useHistory } from "./hooks/useHistory";
+import { useMathProblem } from "./hooks/useMathProblem";
+import { useStats } from "./hooks/useStats";
+import * as Types from "./types";
 
 export default function Home() {
-  const [problem, setProblem] = useState<MathProblem | null>(null)
-  const [userAnswer, setUserAnswer] = useState('')
-  const [feedback, setFeedback] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [sessionId, setSessionId] = useState<string | null>(null)
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
+  const [difficulty, setDifficulty] = useState<Types.Difficulty>("Easy");
+  const [type, setType] = useState<Types.ProblemType>("Random");
+  const [showStats, setShowStats] = useState(false);
+  const [isHistoryView, setIsHistoryView] = useState(false);
+  const [isHintView, setIsHintView] = useState(false);
+  const [feedbackView, setFeedbackView] = useState(false);
+  const [errorView, setErrorView] = useState<Types.ErrorType>("");
 
-  const generateProblem = async () => {
-    // TODO: Implement problem generation logic
-    // This should call your API route to generate a new problem
-    // and save it to the database
-  }
+  const {
+    problem,
+    userAnswer,
+    feedback,
+    isLoading,
+    isGeneratingLoading,
+    isCorrect,
+    setUserAnswer,
+    generateProblem,
+    submitAnswer,
+    reset,
+  } = useMathProblem();
 
-  const submitAnswer = async (e: React.FormEvent) => {
-    e.preventDefault()
-    // TODO: Implement answer submission logic
-    // This should call your API route to check the answer,
-    // save the submission, and generate feedback
-  }
+  const { stats, updateStats } = useStats();
+  const {
+    historyData,
+    isLoading: isHistoryLoading,
+    fetchHistory,
+  } = useHistory();
+  const { hintText, isLoadingHint, fetchHints, clearHint } = useHints();
+
+  const handleGenerateProblem = async () => {
+    setErrorView("");
+    const result = await generateProblem(difficulty, type);
+    if (!result.success) {
+      setErrorView("Generate Error");
+    }
+  };
+
+  const handleSubmitAnswer = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!problem) return;
+
+    const result = await submitAnswer(
+      problem.id,
+      userAnswer,
+      difficulty,
+      (isCorrect) => updateStats(isCorrect, difficulty)
+    );
+
+    if (!result.success) {
+      setErrorView("Submit Error");
+    }
+    setFeedbackView(true);
+  };
+
+  const handleBackToGenerate = () => {
+    reset();
+    setFeedbackView(false);
+    setErrorView("");
+    setType("Random");
+  };
+
+  const handleFetchHistory = async () => {
+    const result = await fetchHistory();
+    if (result.success) {
+      setIsHistoryView(true);
+    }
+  };
+
+  const handleFetchHints = async () => {
+    if (!problem) return;
+    setIsHintView(true);
+    await fetchHints(problem.id);
+  };
+
+  const handleCloseHint = () => {
+    setIsHintView(false);
+    clearHint();
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
-          Math Problem Generator
-        </h1>
-        
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <button
-            onClick={generateProblem}
-            disabled={isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105"
-          >
-            {isLoading ? 'Generating...' : 'Generate New Problem'}
-          </button>
-        </div>
+    <div className="min-h-screen bg-primary py-10">
+      <Toaster />
+      <h1 className="font-extrabold text-center mb-8 text-secondary text-3xl xxs:text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl">
+        Math Problem Generator
+      </h1>
 
-        {problem && (
-          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">Problem:</h2>
-            <p className="text-lg text-gray-800 leading-relaxed mb-6">
-              {problem.problem_text}
-            </p>
-            
-            <form onSubmit={submitAnswer} className="space-y-4">
-              <div>
-                <label htmlFor="answer" className="block text-sm font-medium text-gray-700 mb-2">
-                  Your Answer:
-                </label>
-                <input
-                  type="number"
-                  id="answer"
-                  value={userAnswer}
-                  onChange={(e) => setUserAnswer(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter your answer"
-                  required
+      <main className="relative rounded-2xl mx-auto max-w-[280px] xxs:max-w-xs xs:max-w-sm sm:max-w-md md:max-w-xl lg:max-w-2xl xl:max-w-4xl bg-white">
+        <div className={`${isHistoryView ? "" : "p-4"}`}>
+          {/* History View */}
+          {!isHistoryView && (
+            <>
+              <div className="absolute top-4 left-4">
+                <IconButton
+                  icon={<GrHistory />}
+                  onClick={handleFetchHistory}
+                  disabled={isLoading}
+                  tooltip="Problem History"
                 />
               </div>
-              
-              <button
-                type="submit"
-                disabled={!userAnswer || isLoading}
-                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105"
-              >
-                Submit Answer
-              </button>
-            </form>
-          </div>
+
+              <div className="absolute top-4 left-16">
+                <IconButton
+                  icon={<FaTrophy />}
+                  onClick={() => setShowStats(true)}
+                  disabled={isLoading}
+                  tooltip="Stats"
+                />
+              </div>
+            </>
+          )}
+          {/* Status Badge */}
+          {!isLoading && problem && !isHistoryView && (
+            <div className="absolute flex flex-col xxs:flex-row justify-center items-center gap-4 top-4 right-4">
+              <span className="inline-flex items-center rounded-lg bg-purple-400/10 px-2 py-1 text-lg font-medium text-purple-400 inset-ring inset-ring-purple-400/30">
+                {type}
+              </span>
+              <span className="inline-flex items-center rounded-lg bg-purple-400/10 px-2 py-1 text-lg font-medium text-purple-400 inset-ring inset-ring-purple-400/30">
+                {difficulty}
+              </span>
+            </div>
+          )}
+
+          {/* Landing View */}
+          {!problem && !feedback && !isHistoryView && (
+            <LandingView
+              difficulty={difficulty}
+              type={type}
+              isLoading={isLoading}
+              isGeneratingLoading={isGeneratingLoading}
+              onDifficultyChange={setDifficulty}
+              onTypeChange={setType}
+              onGenerate={handleGenerateProblem}
+            />
+          )}
+
+          {/* Problem View */}
+          {problem && !feedbackView && !isHistoryView && (
+            <>
+              <ProblemDisplay
+                problemText={problem.problem_text}
+                difficulty={difficulty}
+                type={type}
+              />
+
+              {isHintView ? (
+                <HintView
+                  hintText={hintText}
+                  isLoading={isLoadingHint}
+                  onClose={handleCloseHint}
+                  onBack={handleCloseHint}
+                  onRetry={() => problem && fetchHints(problem.id)}
+                />
+              ) : (
+                <AnswerForm
+                  userAnswer={userAnswer}
+                  isLoading={isLoading}
+                  onAnswerChange={setUserAnswer}
+                  onSubmit={handleSubmitAnswer}
+                  onBack={handleBackToGenerate}
+                  onHintClick={handleFetchHints}
+                />
+              )}
+            </>
+          )}
+
+          {/* Feedback View */}
+          {feedback && feedbackView && !errorView && isCorrect !== null && (
+            <FeedbackView
+              isCorrect={isCorrect}
+              feedback={feedback}
+              onAction={
+                isCorrect ? handleBackToGenerate : () => setFeedbackView(false)
+              }
+            />
+          )}
+
+          {/* Error View */}
+          {errorView && (
+            <ErrorView
+              errorType={errorView}
+              message={feedback}
+              isLoading={isLoading}
+              isGeneratingLoading={isGeneratingLoading}
+              onRetry={handleGenerateProblem}
+              onBack={() => {
+                setFeedbackView(false);
+                setErrorView("");
+              }}
+            />
+          )}
+        </div>
+
+        {/* Stats Modal */}
+        {showStats && (
+          <ScoreTracker stats={stats} onClose={() => setShowStats(false)} />
         )}
 
-        {feedback && (
-          <div className={`rounded-lg shadow-lg p-6 ${isCorrect ? 'bg-green-50 border-2 border-green-200' : 'bg-yellow-50 border-2 border-yellow-200'}`}>
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">
-              {isCorrect ? '✅ Correct!' : '❌ Not quite right'}
-            </h2>
-            <p className="text-gray-800 leading-relaxed">{feedback}</p>
-          </div>
+        {/* History Modal */}
+        {isHistoryView && !isHistoryLoading && (
+          <HistoryView
+            historyData={historyData}
+            isLoading={isHistoryLoading}
+            onClose={() => setIsHistoryView(false)}
+          />
         )}
       </main>
     </div>
-  )
+  );
 }
