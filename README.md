@@ -4,7 +4,7 @@ An interactive web application that generates math problems with AI-powered feed
 
 ## Live Demo
 
-[View Live Demo](https://your-app.vercel.app)
+[View Live Demo](https://ottodot-coding-task-ai-math-generator.vercel.app/)
 
 ## Supabase Configuration
 
@@ -34,18 +34,20 @@ To interact with the live demo, use these credentials:
 ## Project Structure
 
 ├── app/
-│ ├── api/ # API routes
-│ ├── components/ # React components
-│ │ ├── views/ # View components
-│ │ ├── IconButton.tsx
-│ │ └── ScoreTracker.tsx
-│ ├── hooks/ # Custom React hooks
-│ ├── lib/ # Supabase client
-│ ├── types.ts # TypeScript types
-│ └── page.tsx # Main page component
+│   ├── api/                  # API routes (generateProblem, submitAnswer, etc.)
+│   ├── components/           # React UI components
+│   │   ├── views/            # Page and section components
+│   │   ├── IconButton.tsx
+│   │   └── ScoreTracker.tsx
+│   ├── hooks/                # Custom React hooks
+│   ├── lib/                  # Supabase and Gemini client setup
+│   ├── types.ts              # Shared TypeScript interfaces
+│   └── page.tsx              # Main page component
 ├── public/
-│ └── images/ # Static images
-└── tailwind.config.ts # Tailwind configuration
+│   └── images/               # Static images and illustrations
+├── styles/                   # Global styles (if any)
+├── tailwind.config.ts        # Tailwind configuration
+└── README.md
 
 ## Author
 
