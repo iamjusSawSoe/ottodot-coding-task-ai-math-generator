@@ -22,6 +22,7 @@ To interact with the live demo, use these credentials:
 - **Problem History**: Track all your previous attempts
 - **Statistics Tracking**: Monitor your performance across difficulty levels
 - **Responsive Design**: Works seamlessly on mobile, tablet, and desktop
+- **Step-by-step solution explanations**: AI-powered step-by-step solutions explainations
 
 ## Tech Stack
 
