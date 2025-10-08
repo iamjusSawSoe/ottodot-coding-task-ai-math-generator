@@ -13,6 +13,7 @@ import { HintView } from "./components/views/HintView";
 import { HistoryView } from "./components/views/HistoryView";
 import { LandingView } from "./components/views/LandingView";
 import { ProblemDisplay } from "./components/views/ProblemDisplay";
+import StepSolutionView from "./components/views/StepSolutionView";
 import { useHints } from "./hooks/useHints";
 import { useHistory } from "./hooks/useHistory";
 import { useMathProblem } from "./hooks/useMathProblem";
@@ -27,6 +28,7 @@ export default function Home() {
   const [isHintView, setIsHintView] = useState(false);
   const [feedbackView, setFeedbackView] = useState(false);
   const [errorView, setErrorView] = useState<Types.ErrorType>("");
+  const [showStepsModal, setShowStepsModal] = useState(false);
 
   const {
     problem,
@@ -186,15 +188,31 @@ export default function Home() {
             </>
           )}
 
-          {/* Feedback View */}
           {feedback && feedbackView && !errorView && isCorrect !== null && (
-            <FeedbackView
-              isCorrect={isCorrect}
-              feedback={feedback}
-              onAction={
-                isCorrect ? handleBackToGenerate : () => setFeedbackView(false)
-              }
-            />
+            <>
+              <FeedbackView
+                isCorrect={isCorrect}
+                feedback={feedback}
+                onAction={
+                  isCorrect
+                    ? handleBackToGenerate
+                    : () => setFeedbackView(false)
+                }
+                onViewSteps={() => setShowStepsModal(true)}
+              />
+
+              {/* Step-by-Step Solution Modal */}
+              {showStepsModal && problem && (
+                <StepSolutionView
+                  problemId={problem.id}
+                  onClose={() => setShowStepsModal(false)}
+                  onBack={() => {
+                    setShowStepsModal(false);
+                    setFeedbackView(false);
+                  }}
+                />
+              )}
+            </>
           )}
 
           {/* Error View */}

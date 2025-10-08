@@ -6,12 +6,14 @@ interface FeedbackViewProps {
   isCorrect: boolean;
   feedback: string;
   onAction: () => void;
+  onViewSteps?: () => void;
 }
 
 export function FeedbackView({
   isCorrect,
   feedback,
   onAction,
+  onViewSteps,
 }: FeedbackViewProps) {
   return (
     <AnimatePresence mode="wait">
@@ -49,13 +51,23 @@ export function FeedbackView({
             </>
           )}
         </h2>
-        <p className="text-lg leading-relaxed">{feedback}</p>
-        <div className="flex justify-center items-center mt-4">
+        <p className="text-lg leading-relaxed mb-6">{feedback}</p>
+
+        {/* Buttons */}
+        <div className="flex flex-col xl:flex-row justify-center items-center gap-4 mt-6">
+          {!isCorrect && onViewSteps && (
+            <button
+              onClick={onViewSteps}
+              className="w-52 sm:w-72 bg-secondary hover:bg-dim-secondary text-white font-bold py-3 px-4 rounded-xl transition duration-200 ease-in-out transform hover:scale-105 shadow-lg"
+            >
+              View Step-by-step Solution
+            </button>
+          )}
           <button
             onClick={onAction}
-            className="w-52 xxs:w-72 bg-secondary hover:bg-dim-secondary text-white font-bold py-3 px-4 rounded-xl transition duration-200 ease-in-out transform hover:scale-105 shadow-lg"
+            className="w-52 sm:w-72 bg-secondary hover:bg-dim-secondary text-white font-bold py-3 px-4 rounded-xl transition duration-200 ease-in-out transform hover:scale-105 shadow-lg"
           >
-            {isCorrect ? "Play Again..." : "Back to Answer"}
+            {isCorrect ? "Play Again" : "Back to Answer"}
           </button>
         </div>
       </motion.div>
