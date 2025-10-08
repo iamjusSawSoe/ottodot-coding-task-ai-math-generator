@@ -33,6 +33,7 @@ To interact with the live demo, use these credentials:
 
 ## Project Structure
 
+```plaintext
 ├── app/
 │   ├── api/                  # API routes (generateProblem, submitAnswer, etc.)
 │   ├── components/           # React UI components
@@ -48,8 +49,9 @@ To interact with the live demo, use these credentials:
 ├── styles/                   # Global styles (if any)
 ├── tailwind.config.ts        # Tailwind configuration
 └── README.md
+```
 
 ## Author
 
-Saw Soe Htut Win
-GitHub: @iamjusSawSoe
+**Saw Soe Htut Win**  
+GitHub: [@iamjusSawSoe](https://github.com/iamjusSawSoe)
